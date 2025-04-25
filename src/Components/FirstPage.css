@@ -1,0 +1,102 @@
+/* src/Components/FirstPage.css */
+
+/* Fading effect for 'Discover' */
+.fadeEffect {
+  animation: fadeInOut 4s infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Sliding phrase base styles */
+.slideFadeEffect {
+  opacity: 0;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+  display: inline-block;
+}
+
+/* Entrance from the left */
+.slideInLeft {
+  animation: slideInLeft 2s forwards, fadeInOut 4s infinite;
+}
+
+/* Entrance from the right */
+.slideInRight {
+  animation: slideInRight 2s forwards, fadeInOut 4s infinite;
+}
+
+/* Exit to the left */
+.slideOutLeft {
+  animation: slideOutLeft 2s forwards, fadeInOut 4s infinite;
+}
+
+/* Exit to the right */
+.slideOutRight {
+  animation: slideOutRight 2s forwards, fadeInOut 4s infinite;
+}
+
+/* Keyframes for sliding and fading */
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(50%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(50%);
+    opacity: 0;
+  }
+}
+@media (max-width: 640px) {
+  .slideFadeEffect {
+    font-size: 1.25rem; /* smaller font size for mobile */
+  }
+
+  .fadeEffect {
+    font-size: 2.5rem; /* smaller heading for mobile */
+  }
+}
+
+  
+  
+  
+  
