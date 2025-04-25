@@ -2,11 +2,17 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate } from 'react-router-dom';
+import axios from 'axios';
+
+
 
 const RegistrationForm = ({ setUserRole }) => {
   const [redirect, setRedirect] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(''); 
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // For toggling password visibility
   const { register, handleSubmit, reset, formState: { errors } } = useForm(); // Ensure `reset` is here
+
+  const togglePassword = () => setShowPassword(!showPassword);
 
   const onSubmit = async (data) => {
     const email = data.email.toLowerCase();
@@ -27,32 +33,26 @@ const RegistrationForm = ({ setUserRole }) => {
     localStorage.setItem("userRole", role); // Persist role
 
     try {
-      const response = await fetch(`https://localhost:5001/api/Users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName: data.username,
-          userPassword: data.password,
-          name: data.firstName,
-          surname: data.lastName,
-          userEmail: data.email
-        })
+      const response = await axios.post('https://localhost:5001/api/Users', {
+        userName: data.username,
+        userPassword: data.password,
+        name: data.firstName,
+        surname: data.lastName,
+        userEmail: data.email,
       });
-    
-      if (response.ok) {
+
+      if (response.status === 201) { // Check if the user was created successfully
         reset();
         setSuccessMessage("✅ Profile created successfully! Redirecting to login...");
         setTimeout(() => setRedirect(true), 2000);
       } else {
-        const errorData = await response.json();
-        console.error("⚠️ Server responded with an error:", errorData);
-        alert(errorData.message || "Registration failed.");
+        alert("Registration failed. Please try again.");
       }
     } catch (err) {
-      console.error("🚨 Network or server error:", err); // ← this is crucial
+      console.error("🚨 Network or server error:", err);
       alert(`An error occurred: ${err.message}`);
     }
-  }
+  };
 
   // If registration was successful, redirect to login
   if (redirect) {
@@ -72,7 +72,7 @@ const RegistrationForm = ({ setUserRole }) => {
         />
         <h1 className="text-4xl font-bold mb-6 text-center text-blue-800">Welcome to the Khoe Kiosk</h1>
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Sign-Up</h2>
-        
+
         {successMessage && (
           <div className="text-green-600 text-center mb-4 font-semibold">{successMessage}</div>
         )}
@@ -113,19 +113,28 @@ const RegistrationForm = ({ setUserRole }) => {
           />
           {errors.email && <p className="text-red-500 text-sm mb-2">{errors.email.message}</p>}
 
-          <input
-            {...register('password', {
-              required: "Password is required",
-              minLength: { value: 8, message: "At least 8 characters" },
-              pattern: {
-                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
-                message: "Password must contain upper, lower, number & symbol"
-              }
-            })}
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 mb-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="relative">
+            <input
+              {...register('password', {
+                required: "Password is required",
+                minLength: { value: 8, message: "At least 8 characters" },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+                  message: "Password must contain upper, lower, number & symbol"
+                }
+              })}
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full px-4 py-2 mb-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={togglePassword}
+              className="absolute right-4 top-4 text-blue-500"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           {errors.password && <p className="text-red-500 text-sm mb-2">{errors.password.message}</p>}
 
           <button
