@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // For navigation after login
-
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = ({ setUserRole }) => {
   const [email, setEmail] = useState('');
@@ -10,48 +9,72 @@ const LoginPage = ({ setUserRole }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const assignRoleBasedOnEmail = (email) => {
+    let role;
+    if (email === "admin@singular.com") {
+      role = 1; // Admin
+    } else if (email.endsWith("@singular.com")) {
+      role = 2; // Normal user
+    } else {
+      alert("Invalid email domain. Use '@singular.com' or 'admin@singular.com'");
+      return null;
+    }
+    return role;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    console.log('Email:', email);
+    console.log('Password:', password);
+
+    const role = assignRoleBasedOnEmail(email);
+    if (role === null) return;
 
     try {
+      const requestBody = {
+        userEmail: email.trim(),  // Correct field name to match backend
+        password: password.trim(),
+      };
+      console.log('Request Payload:', requestBody);
+
       const response = await fetch('https://localhost:5001/api/Users/login', {
         method: 'POST',
+        mode: 'cors',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userEmail: email,
-          password: password
-        })
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
+        console.error('Server Error:', errorData);
+        setError(errorData.message || 'Login failed');
+        return;
       }
 
       const data = await response.json();
+      console.log('Login successful:', data);
 
-      // Determine role based on email
-      let role;
-      if (email.toLowerCase().endsWith('admin@singular.com')) {
-        role = 1; // Admin
-      } else if (email.toLowerCase().endsWith('@singular.com')) {
-        role = 2; // Regular user
-      } else {
-        throw new Error('Invalid email domain');
-      }
-
-      setUserRole(role === 1 ? 'admin' : 'user');
       localStorage.setItem('userId', data.userId);
-      localStorage.setItem('role', role);
+      localStorage.setItem('role', data.role);
 
-    navigate('/products');
+      setUserRole(data.role === 1 ? 'admin' : 'user');
+      navigate('/products');
+
     } catch (err) {
-      setError(err.message);
+      console.error('Login Error:', err);
+      setError('Login failed. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -106,3 +129,7 @@ const LoginPage = ({ setUserRole }) => {
 };
 
 export default LoginPage;
+
+
+
+
